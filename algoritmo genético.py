@@ -1,4 +1,4 @@
-"""
+""" 
 Algoritmo Genético en Python
 
 Este código implementa un algoritmo genético básico para encontrar una cadena objetivo
@@ -22,12 +22,10 @@ Parámetros del algoritmo:
 """
 
 import random
+import sys
 
-# Parámetros del algoritmo genético
-POPULATION_SIZE = 10  # Tamaño de la población
-GENES = "01"  # Genes posibles (binario para este ejemplo)
-TARGET = "1111111111"  # Solución objetivo (cadena de 10 unos)
-MUTATION_RATE = 0.1  # Probabilidad de mutación (10%)
+TARGET = "1111111111"
+GENES = "01"
 
 # Función de aptitud (fitness): Evalúa qué tan cerca está un individuo de la solución
 def fitness(individual):
@@ -45,11 +43,11 @@ def create_individual():
     return ''.join(random.choice(GENES) for _ in range(len(TARGET)))
 
 # Crear la población inicial
-def create_population():
+def create_population(size):
     """
     Crea una población inicial de individuos aleatorios.
     """
-    return [create_individual() for _ in range(POPULATION_SIZE)]
+    return [create_individual() for _ in range(size)]
 
 # Selección por torneo: Elige el mejor entre dos individuos aleatorios
 def selection(population):
@@ -64,51 +62,54 @@ def crossover(parent1, parent2):
     Realiza el cruce entre dos padres para crear un hijo.
     El punto de cruce se elige aleatoriamente.
     """
-    split = random.randint(0, len(TARGET) - 1)
+    split = random.randint(0, len(parent1) - 1)
     return parent1[:split] + parent2[split:]
 
 # Mutación: Cambia aleatoriamente algunos genes
-def mutate(individual):
+def mutate(individual,mutation_rate):
     """
     Aplica mutación a un individuo. Cada gen tiene una probabilidad MUTATION_RATE de mutar.
     """
     return ''.join(
-        gene if random.random() > MUTATION_RATE else random.choice(GENES)
+        gene if random.random() > mutation_rate else random.choice(GENES)
         for gene in individual
     )
 
 # Algoritmo genético principal
-def genetic_algorithm():
-    """
-    Función principal que ejecuta el algoritmo genético.
-    """
-    # Crear la población inicial
-    population = create_population()
+def genetic_algorithm(population_size, mutation_rate):
+    population = create_population(population_size)
     generation = 1
 
     while True:
-        # Mostrar la población actual
-        print(f"Generación {generation}: {population}")
-
-        # Verificar si encontramos la solución
         best_individual = max(population, key=fitness)
+        
         if best_individual == TARGET:
-            print(f"\nSolución encontrada en la generación {generation}: {best_individual}")
-            break
+            # Solo devolvemos estos dos datos
+            return generation, best_individual
 
-        # Crear la nueva generación
         new_population = []
-        for _ in range(POPULATION_SIZE):
+        for _ in range(population_size):
             parent1 = selection(population)
             parent2 = selection(population)
             child = crossover(parent1, parent2)
-            child = mutate(child)
+            child = mutate(child, mutation_rate)
             new_population.append(child)
 
-        # Reemplazar la población anterior con la nueva
         population = new_population
         generation += 1
 
-# Ejecutar el algoritmo genético
 if __name__ == "__main__":
-    genetic_algorithm()
+    if len(sys.argv) != 3:
+        print("Uso: python algoritmo genético.py <poblacion> <mutacion>")
+        sys.exit(1)
+
+    try:
+        poblacion = int(sys.argv[1])
+        mutacion = float(sys.argv[2])
+    except ValueError:
+        print("Error: Poblacion debe ser un entero y mutacion un decimal (0-1)")
+        sys.exit(1)
+
+    generaciones, mejor_individuo = genetic_algorithm(poblacion, mutacion)
+    print(f"Generaciones: {generaciones}")
+    print(f"Mejor individuo: {mejor_individuo}")

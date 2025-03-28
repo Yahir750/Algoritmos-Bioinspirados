@@ -102,7 +102,7 @@ class AntColonySystem:
 
 # --- Ejemplo de uso ---
 if __name__ == "__main__":
-    #np.random.seed(62)  # Para reproducibilidad / comentado para que sea ramdom la semilla :)
+    #np.random.seed(42)  # Para reproducibilidad / comentado para que sea ramdom la semilla :)
     n_cities = 15
     # Generar ciudades aleatorias en un plano 2D
     cities = np.random.rand(n_cities, 2) * 100
